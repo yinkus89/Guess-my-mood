@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess My Mood – Baddie Edition</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#cc66ff"/>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@700&display=swap');
+    :root {
+      --bg: linear-gradient(145deg, #ff99cc, #cc66ff);
+      --text: #fff;
+      --button-hover: #fff;
+      --button-hover-text: #cc00ff;
+      --container-bg: rgba(0, 0, 0, 0.6);
+    }
+    body.dark-mode {
+      --bg: #111;
+      --text: #eee;
+      --button-hover: #333;
+      --button-hover-text: #ff99cc;
+      --container-bg: #222;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Urbanist', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      transition: background 0.5s, color 0.5s;
+    }
+    .container {
+      padding: 25px;
+      max-width: 420px;
+      width: 90%;
+      background: var(--container-bg);
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      display: none;
+    }
+    .scenario {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+    }
+    .options button {
+      font-size: 2rem;
+      margin: 10px;
+      padding: 10px 25px;
+      border: 2px solid var(--text);
+      border-radius: 15px;
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .options button:hover {
+      background: var(--button-hover);
+      color: var(--button-hover-text);
+      transform: scale(1.1);
+    }
+    .result {
+      font-size: 1.3rem;
+      margin-top: 25px;
+      display: none;
+      background: #fff;
+      color: #cc00ff;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #fff;
+    }
+    .restart, .screenshot, .toggle-dark, .play-sound, .next-level {
+      margin-top: 15px;
+      font-size: 1.1rem;
+      color: var(--text);
+      cursor: pointer;
+      text-decoration: underline;
+      display: inline-block;
+    }
+    .score {
+      margin-top: 15px;
+      font-size: 1rem;
+      color: #ffd;
+    }
+    .email-box {
+      margin-top: 20px;
+    }
+    .email-box input {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      margin-right: 10px;
+    }
+    #startScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    #startButton {
+      font-size: 1.5rem;
+      padding: 15px 30px;
+      background: #fff;
+      color: #cc00ff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    #startButton:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background audio and sound effects -->
+<audio id="bg-music" src="https://www.bensound.com/bensound-music/bensound-funkyelement.mp3" loop></audio>
+<audio id="sound-correct" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"></audio>
+<audio id="sound-wrong" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"></audio>
+<audio id="tiktok1" src="https://assets.mixkit.co/sfx/preview/mixkit-cool-interface-click-tone-2568.mp3"></audio>
+<audio id="tiktok2" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-rocket-whoosh-1714.mp3"></audio>
+<audio id="tiktok3" src="https://assets.mixkit.co/sfx/preview/mixkit-cartoon-voice-laugh-343.wav"></audio>
+
+<!-- Start Screen -->
+<div id="startScreen">
+  <h1>💖 Guess My Mood – Baddie Edition 💅</h1>
+  <button id="startButton">🔥 Start the Game</button>
+</div>
+
+<!-- Game Container -->
+<div class="container" id="gameBox">
+  <div class="scenario" id="scenarioText"></div>
+  <div class="options" id="options"></div>
+  <div class="result" id="result"></div>
+  <div class="score" id="score"></div>
+  <div class="restart" onclick="startGame()">💅 Try another mood</div>
+  <div class="screenshot" onclick="takeScreenshot()">📸 Save this moment</div>
+  <div class="play-sound" onclick="playRandomSound()">🔊 Random TikTok Sound</div>
+  <div class="toggle-dark" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</div>
+  <div class="next-level" id="nextLevel" style="display:none" onclick="goToNextLevel()">🚀 Unlock Level 2</div>
+  <div class="email-box">
+    <input type="email" id="email" placeholder="Enter email for updates" />
+    <button onclick="submitEmail()">Subscribe 💌</button>
+  </div>
+</div>
+
+<script>
+    const level1 = [
+  {
+    scenario: "Crush said I’m 'like a sister' after flirting all week 🤡",
+    mood: "😵‍💫", options: ["😭", "😵‍💫", "🤷‍♀️"]
+  },
+  {
+    scenario: "That ‘wyd’ text at 2AM 😒",
+    mood: "😒", options: ["🙃", "😒", "🔥"]
+  },
+  {
+    scenario: "Boss said 'We're like family here' and gave unpaid overtime 😭",
+    mood: "💀", options: ["💀", "😡", "😬"]
+  },
+  {
+    scenario: "'You're overreacting' — when I call out his BS 👏",
+    mood: "😤", options: ["😤", "😐", "😅"]
+  },
+  {
+    scenario: "He said 'you're not like other girls'... like it's a compliment 😒",
+    mood: "🙄", options: ["🙄", "🤢", "🥴"]
+  },
+  {
+    scenario: "I ghosted him before he could ghost me 😈",
+    mood: "😈", options: ["😇", "😈", "🥹"]
+  },
+  {
+    scenario: "My toxic ex watched all my stories today 👁️",
+    mood: "🧊", options: ["🧊", "🥹", "😎"]
+  },
+  {
+    scenario: "He said women aren't funny... then stole my joke 🤡",
+    mood: "🤡", options: ["🤡", "🤔", "💅"]
+  },
+  {
+    scenario: "I showed up overdressed on purpose 😌",
+    mood: "💅", options: ["💅", "😳", "🫣"]
+  },
+  {
+    scenario: "He asked what I bring to the table... I built the table, babe 😤",
+    mood: "💅", options: ["💅", "😤", "🤷‍♀️"]
+  }
+];
+
+const level2 = [
+  {
+    scenario: "Mom asked AGAIN if I have a partner 😬",
+    mood: "🙄", options: ["🙄", "🤭", "😤"]
+  },
+  {
+    scenario: "'Are you on your period?' — when I'm just not smiling 🥴",
+    mood: "😑", options: ["😑", "💀", "😅"]
+  },
+  {
+    scenario: "He called himself 'alpha' but can't handle a strong woman 😆",
+    mood: "😆", options: ["😆", "🫢", "🙃"]
+  },
+  {
+    scenario: "Bestie said I was 'too much'... again 👀",
+    mood: "😌", options: ["😌", "🥺", "🤡"]
+  },
+  {
+    scenario: "They posted 'I'm done with fake people' after you blocked them 🙄",
+    mood: "🧘‍♀️", options: ["🧘‍♀️", "😒", "😂"]
+  },
+  {
+    scenario: "He said 'not all men' during a convo on boundaries 😒",
+    mood: "🙄", options: ["🙄", "😑", "😤"]
+  },
+  {
+    scenario: "He asked if I cook, clean, and submit... in 2025 💀",
+    mood: "💀", options: ["💀", "🤨", "🫠"]
+  },
+  {
+    scenario: "Sent 'lol' and he asked if I was mad 😩",
+    mood: "😩", options: ["😩", "😂", "🤷‍♀️"]
+  },
+  {
+    scenario: "He said 'I'm an empath' after cheating 😭",
+    mood: "🤡", options: ["🤡", "😒", "😢"]
+  },
+  {
+    scenario: "He mansplained how periods work to me 🥴",
+    mood: "🥴", options: ["🥴", "😤", "💅"]
+  }
+];
+
+const bgMusic = document.getElementById("bg-music");
+bgMusic.volume = 0.2;
+
+document.getElementById("startButton").addEventListener("click", () => {
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("gameBox").style.display = "block";
+  bgMusic.play();
+  loadQuestions();
+});
+
+
+let correctCount = 0;
+let totalCount = 0;
+let currentLevel = 1;
+let questions = [];
+
+function loadQuestions() {
+  questions = currentLevel === 1 ? level1 : level2;
+  startGame();
+}
+
+function startGame() {
+  document.getElementById("result").style.display = "none";
+  document.querySelector(".restart").style.display = "none";
+  document.querySelector(".screenshot").style.display = "none";
+
+  const random = questions[Math.floor(Math.random() * questions.length)];
+  document.getElementById("scenarioText").textContent = random.scenario;
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  random.options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.onclick = () => {
+      totalCount++;
+      const isCorrect = opt === random.mood;
+      const correctSound = document.getElementById("sound-correct");
+      const wrongSound = document.getElementById("sound-wrong");
+
+      if (isCorrect) {
+        correctCount++;
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        correctSound.currentTime = 0;
+        correctSound.play();
+      } else {
+        wrongSound.currentTime = 0;
+        wrongSound.play();
+      }
+
+      document.getElementById("result").textContent = isCorrect
+        ? `✔️ Yesss! You're on my wavelength.`
+        : `❌ Uh uh! My real mood was ${random.mood}`;
+
+      document.getElementById("result").style.display = "block";
+      document.querySelector(".restart").style.display = "inline-block";
+      document.querySelector(".screenshot").style.display = "inline-block";
+
+      const percent = Math.round((correctCount / totalCount) * 100);
+      document.getElementById("score").textContent = `You’ve guessed ${correctCount} of ${totalCount} moods – That’s ${percent}% baddie intuition 🔥`;
+
+      if (correctCount >= 10 && currentLevel === 1) {
+        document.getElementById("nextLevel").style.display = "inline-block";
+      }
+    };
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function takeScreenshot() {
+  html2canvas(document.getElementById("gameBox")).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "mood-match.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+
+function playRandomSound() {
+  const sounds = [
+    document.getElementById("tiktok1"),
+    document.getElementById("tiktok2"),
+    document.getElementById("tiktok3")
+  ];
+  const random = sounds[Math.floor(Math.random() * sounds.length)];
+  random.currentTime = 0;
+  random.play();
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
+function submitEmail() {
+  const email = document.getElementById("email").value;
+  if (email.includes("@")) {
+    alert("Thanks! We'll keep you updated ✨");
+    document.getElementById("email").value = "";
+  } else {
+    alert("Please enter a valid email.");
+  }
+}
+
+function goToNextLevel() {
+  currentLevel = 2;
+  correctCount = 0;
+  totalCount = 0;
+  document.getElementById("nextLevel").style.display = "none";
+  loadQuestions();
+}
+</script>
+</body>
+</html>
