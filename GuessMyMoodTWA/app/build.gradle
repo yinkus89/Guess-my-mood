@@ -26,7 +26,7 @@ def twaManifest = [
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: 'Guess My Mood – Baddie Edition', // The application name.
     launcherName: 'GuessMyMood', // The name shown on the Android Launcher.
-    themeColor: '#FFFFFF', // The color used for the status bar.
+    themeColor: '#CC66FF', // The color used for the status bar.
     themeColorDark: '#000000', // The color used for the dark status bar.
     navigationColor: '#000000', // The color used for the navigation bar.
     navigationColorDark: '#000000', // The color used for the dark navbar.

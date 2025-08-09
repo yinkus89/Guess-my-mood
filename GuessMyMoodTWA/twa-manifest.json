@@ -4,7 +4,7 @@
   "name": "Guess My Mood – Baddie Edition",
   "launcherName": "GuessMyMood",
   "display": "standalone",
-  "themeColor": "#FFFFFF",
+  "themeColor": "#CC66FF",
   "themeColorDark": "#000000",
   "navigationColor": "#000000",
   "navigationColorDark": "#000000",
@@ -18,7 +18,7 @@
   "monochromeIconUrl": "https://guessmymood.netlify.app/icon-512-mono.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "C:\\Users\\Windows\\guess_my_moo",
+    "path": "C:\\Users\\Windows\\guess_my_mood\\guessmymood.keystore",
     "alias": "android"
   },
   "appVersionName": "1",
