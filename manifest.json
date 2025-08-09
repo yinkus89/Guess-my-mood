@@ -1,30 +1,30 @@
 {
   "name": "Guess My Mood – Baddie Edition",
   "short_name": "GuessMyMood",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#cc66ff",
   "theme_color": "#cc66ff",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://guessmymood.netlify.app/icon-192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://guessmymood.netlify.app/icon-512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "https://guessmymood.netlify.app/icon-512-maskable.png",
+      "src": "/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "https://guessmymood.netlify.app/icon-512-mono.png",
+      "src": "/icon-512-mono.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "monochrome"
